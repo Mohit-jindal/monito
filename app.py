@@ -21,7 +21,7 @@ app.config["PERMANENT_SESSION_LIFETIME"] = 900  # seconds
 db = SQLAlchemy(app)
 
 
-class User(db.Model):
+class Users(db.Model):
     id = db.Column('userID', db.Integer, primary_key=True)
     name = db.Column(db.String(30))
     username = db.Column(db.String(20), unique=True)
@@ -49,7 +49,7 @@ class Machine(db.Model):
 
 @app.route('/', methods=["GET", "POST"])
 def login():
-    users = User.query.all()
+    users = Users.query.all()
     session.clear()
 
     if request.form:
@@ -68,15 +68,15 @@ def login():
 
 @app.route('/register', methods=["GET", "POST"])
 def register():
-    users = User.query.all()
+    users = Users.query.all()
     userExists = False
 
     if request.form:
 
-        user = User(name=request.form.get('user_name').strip().lower(),
-                    username=request.form.get('username').strip().lower(),
-                    vdaIP=request.form.get('user_vda-ip').strip(),
-                    hostname=request.form.get('user_hostname').strip().lower())
+        user = Users(name=request.form.get('user_name').strip().lower(),
+                     username=request.form.get('username').strip().lower(),
+                     vdaIP=request.form.get('user_vda-ip').strip(),
+                     hostname=request.form.get('user_hostname').strip().lower())
 
         for elem in users:
             if elem.username == user.username or elem.vdaIP == user.vdaIP or elem.hostname == user.hostname:
@@ -103,7 +103,7 @@ def about():
 def dashboard():
     if isUserLoggedIn():
         username = session['user_name']
-        curr_user = User.query.filter_by(username=username).first()
+        curr_user = Users.query.filter_by(username=username).first()
         session['name'] = curr_user.name
         return render_template('dashboard.html', currentUser=curr_user)
     else:
@@ -175,8 +175,8 @@ def mappings():
         active_users = ''
         machine_obj = {}
         for IP in active_user_machine_names:
-            userByVDA = User.query.filter_by(vdaIP=IP).first()
-            userByHost = User.query.filter(User.hostname.ilike(IP.split(".")[0] + "%")).first()
+            userByVDA = Users.query.filter_by(vdaIP=IP).first()
+            userByHost = Users.query.filter(Users.hostname.ilike(IP.split(".")[0] + "%")).first()
             if userByVDA:
                 active_users += userByVDA.name + ','
             elif userByHost:
